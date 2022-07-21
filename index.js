@@ -34,30 +34,24 @@ app.get("/api/", (req, res) => {
 })
 
 const getDate = (date) => {
-  if (date === 0) {
-    let currentDate = new Date();
-    return {
-      unix: Date.parse(currentDate), 
-      utc: currentDate.toGMTString() 
-    }
-  }
+  if (date === 0) { let currentDate = new Date(); return { unix: Date.parse(currentDate), utc: currentDate.toUTCString() } }
 
   let utcDate;
-  let newDate = date.split('-').map(unit => Number(unit));
-  if (newDate.includes(NaN)) {
-    return {
-      error: "Invalid Date" 
-    }
-  }
+  const regex = /(%20)|(-)|(GMT)/gi;
+  let newDate = date.replace(regex, ' ').split(' ');
 
   if (newDate.length > 1) {
-    utcDate = new Date(Date.UTC(newDate[0], newDate[1] - 1, newDate[2])); // year, month, day
+    utcDate = new Date(newDate.join(' ') + ' GMT');
   } else {
-    utcDate = new Date(newDate[0]);
+    utcDate = new Date(parseInt(newDate[0]));
   }
-  console.log(`returning {unix: ${Date.parse(utcDate)}, utc: ${utcDate.toGMTString()}}`);
+
+  if (utcDate.toString() === "Invalid Date") {
+    return { error: utcDate.toString() }
+  }
+
   return {
     unix: Date.parse(utcDate),
-    utc: utcDate.toGMTString()
+    utc: utcDate.toUTCString()
   }
 }
