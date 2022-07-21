@@ -36,19 +36,12 @@ app.get("/api/", (req, res) => {
 const getDate = (date) => {
   if (date === 0) { let currentDate = new Date(); return { unix: Date.parse(currentDate), utc: currentDate.toUTCString() } }
 
-  let utcDate;
   const regex = /(%20)|(-)|(GMT)/gi;
-  let newDate = date.replace(regex, ' ').split(' ');
+  const newDate = date.replace(regex, ' ').split(' ');
+  const utcDate = newDate.length > 1 ? new Date(newDate.join(' ' + ' GMT')) :
+                                       new Date(parseInt(newDate[0]));
 
-  if (newDate.length > 1) {
-    utcDate = new Date(newDate.join(' ') + ' GMT');
-  } else {
-    utcDate = new Date(parseInt(newDate[0]));
-  }
-
-  if (utcDate.toString() === "Invalid Date") {
-    return { error: utcDate.toString() }
-  }
+  if (utcDate.toString() === "Invalid Date") return { error: utcDate.toString() }
 
   return {
     unix: Date.parse(utcDate),
